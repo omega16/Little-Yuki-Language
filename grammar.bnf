@@ -1,0 +1,113 @@
+
+LPAR : "("
+
+RPAR : ")"
+
+TYPE_CONTEXT_START : "-|"
+
+TYPE_IS_EXPRESSION_OF : "::"
+
+ARROW : "->"
+
+EOE : ";"
+
+PIPE_LEFT.2 : "<|"
+PIPE_RIGHT.2 : "|>"
+
+PIPE_LEFT_LIST : "<[]|"
+
+PIPE_RIGHT_LIST : "|[]>"
+
+PIPE_ARG_RIGHT : /\$(0+|[1-9][0-9]*)>\$/
+
+PIPE_ARG_LEFT : /\$(0+|[1-9][0-9]*)<\$/
+
+PIPE_ARG_UNDIRECTED : /\$(0+|[1-9][0-9]*$)/
+
+PIPE_OUT_LEFT : /\$_(0+|[1-9][0-9]*)<\$/
+
+PIPE_OUT_RIGHT : /\$_(0+|[1-9][0-9]*)>\$/
+
+PIPE_OUT_UNDIRECTED : /\$_(0+|[1-9][0-9]*)\$/
+
+pipe_arg : PIPE_ARG_UNDIRECTED | PIPE_ARG_RIGHT | PIPE_ARG_LEFT |PIPE_LEFT |PIPE_RIGHT | PIPE_OUT_RIGHT |PIPE_OUT_RIGHT 
+
+special_symbols.2 : /\b_\b/ | "@" | pipe_arg
+
+identifier : /[^(){}\[\]\|\.\\\n\s@$=:;<>+-\/*]+/
+
+identifier_parentheses : LPAR identifier RPAR
+    | LPAR identifier_parentheses RPAR
+
+string : ESCAPED_STRING
+
+num : NUMBER
+
+infix_operator : "+"|"-"|"*"|"/"
+
+uneval_function : "@" (identifier | infix_operator)
+
+
+
+
+
+type_assumption : "mut"? identifier TYPE_IS_EXPRESSION_OF type TYPE_CONTEXT_START type_context
+
+type_atom : identifier
+    | "(" type ")"
+
+type : type_atom (ARROW type_atom )*
+
+type_context_type_atom : identifier
+    | LPAR type_context_type RPAR
+
+type_context_type : type_context_type_atom+ 
+
+type_context_atom : identifier TYPE_IS_EXPRESSION_OF type_context_type
+    | LPAR type_context RPAR 
+
+type_context : type_context_atom 
+
+    
+
+
+
+?atom : string
+    | num
+    | identifier
+    | uneval_function 
+    | LPAR expression_content RPAR
+
+?function_application : atom+
+
+?prod : function_application ("*" function_application)*
+
+?div : prod ("/" prod)?
+
+?add : div (("+"|"-") div)*
+
+?pipe : add (ARROW add)*
+
+expression_content : pipe
+
+expression : (expression_content | type_assumption) EOE
+
+
+
+program : expression*
+
+
+
+//a->b->c
+//(a->b)->c
+//a->(b->c)
+//a->(b->c)->d
+//a->(b)->(c->d->e->(f->g))->((h))->i
+
+
+%declare subrutine_application 
+%import common.ESCAPED_STRING
+%import common.NUMBER
+%import common.WS
+%import common.CNAME
+%ignore WS

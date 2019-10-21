@@ -1,0 +1,36 @@
+
+TYPE_CONTEXT_START : "-|"
+
+TYPE_IS_EXPRESSION_OF : "::"
+
+ARROW : "->"
+
+identifier = CNAME
+
+type_assumption : identifier TYPE_IS_EXPRESSION_OF type_expression ( TYPE_CONTEXT_START type_context )? 
+
+
+type_expression_parentheses : LPAR type_expression_arrow RPAR
+    | LPAR type_expression_parentheses RPAR
+
+type_expression_arrow : ( (identifier | identifier_parentheses | type_expression_parentheses) ARROW )+ (identifier | identifier_parentheses | type_expression_parentheses)
+
+type_expression : identifier 
+    | identifier_parentheses
+    | type_expression_parentheses
+    | type_expression_arrow
+
+
+
+type_context_variable : identifier TYPE_IS_EXPRESSION_OF (identifier | identifier_parentheses)+
+
+type_context_parentheses : LPAR type_context_variable RPAR
+    | LPAR type_context_parentheses  RPAR
+
+type_context :  type_context_variable
+    |  type_context_parentheses+ type_context_variable?
+
+
+%import common.WS
+%import common.CNAME
+%ignore WS
