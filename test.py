@@ -67,7 +67,7 @@ def interprete_tree(tree):
 def interprete_file(path):
     with open(path,"r") as fileP:
         source = fileP.read()
-    interprete_tree(parser.parse(source))
+    print(parser.parse(source).pretty())
 
 def interprete_string(string):
     return Trans().transform(parser.parse(string)).pretty()
