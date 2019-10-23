@@ -61,7 +61,7 @@ infix_operator : PLUS|MINUS|MUL|DIV
 
 
 
-type_assumption_subrutine : "subrutine" identifier _TYPE_IS_EXPRESSION_OF type (_TYPE_CONTEXT_START type_context)?
+type_assumption_subroutine : "subroutine" identifier _TYPE_IS_EXPRESSION_OF type (_TYPE_CONTEXT_START type_context)?
 
 type_assumption_function : identifier _TYPE_IS_EXPRESSION_OF type _TYPE_CONTEXT_START type_context
 
@@ -143,12 +143,12 @@ function_pattern : identifier
 function_declaration : type_assumption_function _LPAR (identifier function_pattern _EQU expression)+ _RPAR
     | type_assumption_function _LBRACE (identifier function_pattern _EQU expression)+ _RBRACE
 
-subrutine_declaration : type_assumption_subrutine _LPAR ((identifier function_pattern _EQU expression )* | identifier _EQU expression )_RPAR
-    | type_assumption_subrutine _LBRACE ((identifier function_pattern _EQU expression )* | identifier _EQU expression ) _RBRACE
+subroutine_declaration : type_assumption_subroutine _LPAR ((identifier function_pattern _EQU expression )* | identifier _EQU expression )_RPAR
+    | type_assumption_subroutine _LBRACE ((identifier function_pattern _EQU expression )* | identifier _EQU expression ) _RBRACE
 
 
 statement : function_declaration
-    | subrutine_declaration
+    | subroutine_declaration
 
 program : (statement |import_)*
 
@@ -161,7 +161,7 @@ program : (statement |import_)*
 //a->(b)->(c->d->e->(f->g))->((h))->i
 
 
-%declare subrutine_application 
+%declare subroutine_application 
 %import common.ESCAPED_STRING
 %import common.NUMBER
 %import common.WS

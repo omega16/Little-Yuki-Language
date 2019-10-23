@@ -74,7 +74,7 @@ class UnsugarTree(Transformer):
         return Tree("type",items)
 
 
-    def type_assumption_subrutine(self,items):
+    def type_assumption_subroutine(self,items):
         name_tok = items[0].children[0]
         exists = self.lyl_scope.search_name(name_tok.value)
         if exists :
@@ -83,7 +83,7 @@ class UnsugarTree(Transformer):
         f = Pt.Function(name_tok.value,type_,False)
         return Tree("type_assumption",[f])
 
-    def subrutine_declaration(self,items):
+    def subroutine_declaration(self,items):
         f=items[0].children[0]
         if len(items[1:])>2:
             cases = []
@@ -94,17 +94,17 @@ class UnsugarTree(Transformer):
             case = Tree("cases",cases)
             body = Tree("body",[case])
             f.body = body
-            return Tree("subrutine_declaration",[f])
+            return Tree("subroutine_declaration",[f])
         elif len(items[1:])==2 : 
             if items[1].children[0].value != f.name:
                 raise Exception("Bad function name {}, expected {}".format(items[1].children[0].value, f.name))
             body = Tree("body",[items[-1]])
             f.body = body
-            return Tree("subrutine_declaration",[f])
+            return Tree("subroutine_declaration",[f])
         else : 
             body = Tree("body",["Empty"])
             f.body = body
-            return Tree("subrutine_declaration",[f])
+            return Tree("subroutine_declaration",[f])
 
     # def function_application(self,items):
     #     counter=0
@@ -119,7 +119,7 @@ class UnsugarTree(Transformer):
 
 
 class ShowFunctions(Transformer):
-    def subrutine_declaration(self,items):
+    def subroutine_declaration(self,items):
         print(items[0])
 
 

@@ -51,7 +51,7 @@ class Module:
         self.constructors = dict()
         self.types = dict()
         self.functions = dict()
-        self.subrutines = dict()
+        self.subroutines = dict()
 
     def add_constructor(self,constructor):
         self.constructors[constructor.name]=constructor
@@ -62,8 +62,8 @@ class Module:
     def add_funtion(self,function):
         self.functions[function.name]=function
 
-    def add_subrutine(self,subrutine):
-        self.subrutines[subrutine.name]=subrutine
+    def add_subroutine(self,subroutine):
+        self.subroutines[subroutine.name]=subroutine
 
     def add_module(self,module):
         if module.name in self.modules:
@@ -93,7 +93,7 @@ class Module:
 
 
     def module_search_name(self,name):
-        for dic in [self.functions,self.subrutines,self.types,self.constructors]:
+        for dic in [self.functions,self.subroutines,self.types,self.constructors]:
             if name in dic :
                 return (self,dic[name])
         return False
@@ -142,7 +142,7 @@ STD.add_funtion(STD_DIV)
 
 
 Fprint = Function("print", (Char), None)
-STD.add_subrutine(Fprint)
+STD.add_subroutine(Fprint)
 
 
 CModule = Module("lang_c","lang_c",None)

@@ -1,5 +1,5 @@
 import lang_c
 
-subrutine main:: (None -> a) -| a::lang_c.Uint8{
+subroutine main:: (None -> a) -| a::lang_c.Uint8{
 main = print "¡Hola mundo!";
 }
