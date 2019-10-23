@@ -1,17 +1,27 @@
  
-LPAR : "("
+_LPAR : "("
 
-RPAR : ")"
+_RPAR : ")"
 
-LBRACE : "{"
+_LBRACE : "{"
 
-RBRACE : "}"
+_RBRACE : "}"
 
-TYPE_CONTEXT_START : "-|"
+_TYPE_CONTEXT_START : "-|"
 
-TYPE_IS_EXPRESSION_OF : "::"
+_TYPE_IS_EXPRESSION_OF : "::"
 
-ARROW : "->"
+_EQU : "="
+
+_ARROW : "->"
+
+PLUS : "+"
+
+MINUS : "-"
+
+MUL : "*"
+
+DIV : "/"
 
 EOE : ";"
 
@@ -36,48 +46,46 @@ PIPE_OUT_UNDIRECTED : /\$_(0+|[1-9][0-9]*)\$/
 
 pipe_arg : PIPE_ARG_UNDIRECTED | PIPE_ARG_RIGHT | PIPE_ARG_LEFT  | PIPE_OUT_RIGHT |PIPE_OUT_RIGHT |PIPE_OUT_UNDIRECTED
 
-special_symbols.2 : /\b_\b/ | "@" | pipe_arg
 
-identifier : /(([^(){}\[\]\|\.\\\n\s@$=:;<>+-\/*]([^(){}\[\]\|\\\n\s@$=:;<>+-\/*]|\.)*)|_([^(){}\[\]\|\\\n\s@$=:;<>+-\/*]|\.)+)/
+identifier : /(([^(){}\[\]\|\.\\\n\s@$=:;<>+\-'"\/*]([^(){}\[\]\|\\\n\s@$=:;<>+\-'"\/*]|\.)*)|_([^(){}\[\]\|\\\n\s@$=:;<>+\-'"\/*]|\.)+)/
 
-identifier_parentheses : LPAR identifier RPAR
-    | LPAR identifier_parentheses RPAR
+
+identifier_parentheses : _LPAR identifier _RPAR
+    | _LPAR identifier_parentheses _RPAR
 
 string : ESCAPED_STRING
 
 num : NUMBER
 
-infix_operator : "+"|"-"|"*"|"/"
+infix_operator : PLUS|MINUS|MUL|DIV
 
 
 
-type_assumption_subrutine : "subrutine" identifier TYPE_IS_EXPRESSION_OF type TYPE_CONTEXT_START type_context
-    | "subrutine" identifier TYPE_IS_EXPRESSION_OF "None"
-    | "subrutine" identifier TYPE_IS_EXPRESSION_OF "None" TYPE_CONTEXT_START type_context
+type_assumption_subrutine : "subrutine" identifier _TYPE_IS_EXPRESSION_OF type (_TYPE_CONTEXT_START type_context)?
 
-type_assumption_function : identifier TYPE_IS_EXPRESSION_OF type TYPE_CONTEXT_START type_context
+type_assumption_function : identifier _TYPE_IS_EXPRESSION_OF type _TYPE_CONTEXT_START type_context
 
 type_atom : identifier
     | "(" type ")"
 
-type : type_atom (ARROW type_atom )*
+type : type_atom (_ARROW type_atom )*
 
-type_context : (LPAR identifier TYPE_IS_EXPRESSION_OF identifier RPAR)* identifier TYPE_IS_EXPRESSION_OF identifier 
+type_context : (_LPAR identifier _TYPE_IS_EXPRESSION_OF identifier _RPAR)* identifier _TYPE_IS_EXPRESSION_OF identifier 
 
     
 
 
 
 
-uneval_function : "@" (identifier | infix_operator)
+un_evaluated_function : "@" (identifier | infix_operator)
 
 
 ?atom : string
     | num
     | identifier
-    | uneval_function 
+    | un_evaluated_function
     | pipe_arg
-    | LPAR pipe RPAR
+    | _LPAR pipe _RPAR
 
 ?function_application : atom+
 
@@ -89,11 +97,11 @@ uneval_function : "@" (identifier | infix_operator)
 
 ?pipe : add ((PIPE_RIGHT | PIPE_LEFT) add)*
 
-let : "let" pattern "be" LPAR expression  RPAR "in" expression_block
-    | "let" pattern "be" LBRACE expression RBRACE "in" expression_block
+let : "let" pattern "be" _LPAR expression  _RPAR "in" expression_block
+    | "let" pattern "be" _LBRACE expression _RBRACE "in" expression_block
 
-case : "case" LPAR ("|" expression? "=" expression)+ RPAR
-    | "case" LBRACE ("|" expression? "=" expression)+ RBRACE
+case : "case" _LPAR ("|" expression? _EQU expression)+ _RPAR
+    | "case" _LBRACE ("|" expression? _EQU expression)+ _RBRACE
 
 
 expression : pipe  EOE
@@ -103,45 +111,46 @@ expression : pipe  EOE
 
 
 
-expression_block : LPAR (expression | statement |identifier "=" expression )* expression RPAR
-    | LBRACE (expression | statement | identifier "=" expression )* expression RBRACE
+expression_block : _LPAR (expression | statement |identifier _EQU expression )* expression _RPAR
+    | _LBRACE (expression | statement | identifier _EQU expression )* expression _RBRACE
 
-statement_block : LPAR (expression | statement | identifier "=" expression )* RPAR
-    | LBRACE (expression | statement | identifier "=" expression)* RBRACE
+statement_block : _LPAR (expression | statement | identifier _EQU expression )* _RPAR
+    | _LBRACE (expression | statement | identifier _EQU expression)* _RBRACE
 
 
 pattern_atom : identifier
     | "_"
-    | LBRACE pattern RBRACE
-    | LPAR pattern RPAR 
+    | _LBRACE pattern _RBRACE
+    | _LPAR pattern _RPAR 
 
 pattern : pattern_atom +
 
 import_as : identifier "as" identifier
 
-import : "import" identifier ("as" identifier)?
-    | "from" identifier "import" ( (identifier | import_as) ",")* (identifier | import_as)
+import_from : "from" identifier "import" ( (identifier | import_as) ",")* (identifier | import_as)
+
+import_ : "import" identifier ("as" identifier)?
+    | import_from
 
 
 function_pattern : identifier
     | "_"
     | num
-    | LBRACE pattern RBRACE
-    | LPAR pattern RPAR 
+    | _LBRACE pattern _RBRACE
+    | _LPAR pattern _RPAR 
 
 
-function_declaration : type_assumption_function LPAR (identifier function_pattern "=" expression)+ RPAR
-    | type_assumption_function LBRACE (identifier function_pattern "=" expression)+ RBRACE
+function_declaration : type_assumption_function _LPAR (identifier function_pattern _EQU expression)+ _RPAR
+    | type_assumption_function _LBRACE (identifier function_pattern _EQU expression)+ _RBRACE
 
-subrutine_declaration : type_assumption_subrutine LPAR ((identifier function_pattern "=" expression )* | identifier "=" expression )RPAR
-    | type_assumption_subrutine LBRACE ((identifier function_pattern "=" expression )* | identifier "=" expression ) RBRACE
+subrutine_declaration : type_assumption_subrutine _LPAR ((identifier function_pattern _EQU expression )* | identifier _EQU expression )_RPAR
+    | type_assumption_subrutine _LBRACE ((identifier function_pattern _EQU expression )* | identifier _EQU expression ) _RBRACE
 
 
 statement : function_declaration
     | subrutine_declaration
-    | import 
 
-program : statement*
+program : (statement |import_)*
 
 
 
