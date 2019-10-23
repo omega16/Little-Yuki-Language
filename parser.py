@@ -92,38 +92,56 @@ class UnsugarTree(Transformer):
                     raise Exception("Bad function name {}, expected {}".format(case.children[0].value, f.name))
                 cases.append(Tree("case",[case,items[index+1],items[index+2]]))
             case = Tree("cases",cases)
-            body = Tree("body",[case])
-            f.body = body
+            f.body = case
             return Tree("subroutine_declaration",[f])
         elif len(items[1:])==2 : 
             if items[1].children[0].value != f.name:
                 raise Exception("Bad function name {}, expected {}".format(items[1].children[0].value, f.name))
-            body = Tree("body",[items[-1]])
-            f.body = body
+            f.body = items[-1]
             return Tree("subroutine_declaration",[f])
         else : 
-            body = Tree("body",["Empty"])
-            f.body = body
+            f.body = Tree("Empty",["Empty"])
             return Tree("subroutine_declaration",[f])
 
-    # def function_application(self,items):
-    #     counter=0
-    #     while(counter<len(items))
-    #         item = items[0]
-    #         if item.data=="identifier":
-    #             args_counter = counter+1
-    #             while(args_counter<len(items)):
-    #                 if items[args_counter].data!=
-                        
-    #     return Tree("Application",[last])
+    def function_application(self,items):
+        #Assuming well parsed the types for function (it's not well parsed right now, but it will done, for now we only need to work with main)
+        f = items[0]
+        if len(items) ==1 :
+            if f.data != "identifier":
+                raise Exception("Bad function evaluation at : {}".format(items[0].pretty()))
+            exists = self.lyl_scope.module_search_name(f.children[0])
+            if exists:
+                return Tree("function_application",[exists[1]]);
+        if f.data!="identifier":
+            raise Exception("Bad function evaluation at : {}".format(items[0].pretty()))
+        exists = self.lyl_scope.search_name(f.children[0])
+        if exists:
+            last = exists[1]
+            for out in items[0::-1]:
+                last = Tree(last,[out])
+            return last;
+        raise Exception("Can't find definition for function {} ".format(f.children[0]))
 
+    def expression(self,items):
+        return items[0]
 
 class ShowFunctions(Transformer):
     def subroutine_declaration(self,items):
         print(items[0])
 
+main_=None
+class GetMain(Transformer):
+    def subroutine_declaration(self,items):
+        global main_
+        if items[0].name =="main":
+            print("Main founded",items)
+            main_ = items[0]
 
 
+
+def get_main(tree):
+    GetMain().transform(tree)
+    return main_
 
 def test_show(string):
     print(80*"-")
@@ -137,32 +155,34 @@ def test_show(string):
     print(80*"-") 
 
 
+
+
+def appli_function(f,value):
+    print(value)
+
 def interprete_tree(tree):
-    for statement in DesugarTransformation().transform(tree):
-        if isinstance(statement,Lambda):
-            print("Reducing : \n")
-            founded=True
-            while (founded):
-                founded=False
-                for variable in asigned_variables:
-                    if variable in statement.free:
-                        # print("substituting",variable,asigned_variables[variable])
-                        statement = lambda_substitution(statement, variable, asigned_variables[variable])
-                        founded=True
-            # print(statement.pretty())
-            reduction=normal_reduction(statement)
-            if reduction :
-                print(reduction.pretty())
-            else :
-                print("Can't terminate reduction, maybe infinity? augment max reduction attempt if you know expression must terminate")
-        else :
-            print("defined : ",statement)
+    print(tree)
+    if isinstance(tree,Tree):
+        if tree.children:
+            if len(tree.children)>0:
+                result = interprete_tree(tree.children[0])
+                if isinstance(tree.data,Pt.Function):
+                    return appli_function(tree.data,result)
+                else :
+                    return tree.data
+    if isinstance(tree,Token):
+        return tree.value
+
+
 
 def interprete_file(path):
     with open(path,"r") as fileP:
         source = fileP.read()
-    usugar = UnsugarTree().transform(parser.parse(source))
-    ShowFunctions().transform(usugar)
+    unsugar = UnsugarTree().transform(parser.parse(source))
+    # ShowFunctions().transform(unsugar)
+    main = get_main(unsugar)
+    # print(main)
+    interprete_tree(main.body)
 
 def interprete_string(string):
     return Trans().transform(parser.parse(string)).pretty()

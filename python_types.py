@@ -37,7 +37,7 @@ class Function:
 
     def __str__(self):
         if self.body :
-            return("Function {} \n {}".format(self.name,self.body.pretty()))
+            return("Function {} \n{}".format(self.name,self.body))
         return("Empty_Function {}".format(self.name))
 
 class Module:
@@ -137,7 +137,6 @@ STD_MUL = Function("*",Complex,None)
 STD.add_funtion(STD_MUL)
 STD_DIV = Function("/",Complex,None)
 STD.add_funtion(STD_DIV)
-
 
 
 
